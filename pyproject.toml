@@ -11,6 +11,7 @@ python = "^3.10"
 python-bcb = "^0.2.0"
 pandas = "^2.2.2"
 plotnine = "^0.13.6"
+jupyter = "^1.0.0"
 
 
 [build-system]

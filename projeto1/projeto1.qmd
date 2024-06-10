@@ -1,0 +1,132 @@
+---
+title: "<img src='Logo_Completo_Chumbo.png' height='40'> Relatório de Inflação - IPCA"
+author: "Rafael Souza"
+date: today
+lang: pt
+format: 
+  html:
+    page-layout: full
+jupyter: python3
+execute: 
+  echo: false
+  warning: false
+---
+
+```{python}
+
+# Importa bibliotecas
+from bcb import sgs
+import pandas as pd
+import plotnine as p9
+import locale
+
+# Configurar o locale para português
+locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+
+# Importa dados
+dados_brutos_nucleos = sgs.get(
+  codes = {"EX0": 11427, "EX3": 27839, "MS": 4466, "DP": 16122, "P55": 28750},
+  start = "2020-01-01"
+)
+  
+dados_brutos_IPCA = sgs.get(
+    codes = {"Meta % anual": 13521, "Var. % mensal": 433},
+    start = "2019-01-01"
+)
+
+# Trata dados 
+dados_limpos_nucleos = (
+  dados_brutos_nucleos
+  .assign(**{"Média dos núcleos": dados_brutos_nucleos.mean(axis = 1)})
+  .reset_index()
+  .melt(id_vars = "Date", var_name = "variavel", value_name = "valor")
+)
+
+dados_limpos_ipca = (
+  dados_brutos_IPCA
+  .fillna(method = "ffill")
+  .assign(**{"Var. % acum. 12m": ((dados_brutos_IPCA["Var. % mensal"] / 100) + 1).rolling(12).apply(lambda x: (x.prod() -1)*100)})
+  .dropna()
+  .reset_index()
+  .melt(id_vars = "Date", var_name = "variavel", value_name = "valor")
+)
+
+
+```
+
+```{python}
+ultimo_mes = dados_brutos_IPCA.tail(1).index[0].strftime("%B/%Y").capitalize()
+ultimo_mes_varperc = dados_brutos_IPCA.iloc[-1, 1]
+
+#dados_limpos_ipca.query('variavel == "Var. % acum. 12m"').tail(1)
+```
+
+::: grid
+::: g-col-7
+## Inflação cheia
+
+Principais destaques para o Índice nacional de preços ao consumidor-amplo (IPCA):
+
+-   IPCA variou `{python} f'{ultimo_mes_varperc}%'` no mês `{python} ultimo_mes` em relação ao mês anterior.
+-   Na variação anual, a inflação variou 3,69% nos últimos 1
+-   A meta de inflação para o ano de 2024 é de 3,00%, conforme o CMN.
+
+As informações são, quando não explicitamente referenciadas, do IBGE.
+
+::: {.callout-note}
+## **Conceito**
+IPCA é a sigla de Índice Nacional de Preços ao Consumidor Amplo, um índice de preços produzido pelo IBGE. Trata-se de uma medida acumulada do comportamento dos preços de bens e serviços da economia brasileira. A inflação é a taxa de crescimento deste índice.
+:::
+
+
+## Núcleos da inflação
+
+- Item 1
+- Item 2
+- Item 3
+
+:::
+
+::: g-col-5
+```{python}
+(
+  p9.ggplot(dados_limpos_ipca) +
+  p9.aes(x = "Date", y = "valor", color = "variavel", linetype = "variavel")+
+  p9.geom_line(size = 1)+
+  p9.scale_x_date(date_labels = "%Y", date_breaks = "12 months")+
+  p9.labs(title = "Inflação cheia (IPCA)", 
+          caption = "Dados: BCB e IBGE | Elaboração: ÁFIRA INVESTIMENTOS",
+          color = "",
+          linetype = ""
+          ) +
+  p9.xlab("")+
+  p9.ylab("")+
+  p9.theme_gray(base_size = 16)+
+  p9.theme(legend_position = "top")
+       
+)
+
+```
+
+```{python}
+(
+  p9.ggplot(dados_limpos_nucleos) +
+  p9.aes(x = "Date", y = "valor", color = "variavel")+
+  p9.geom_line(size = 1)+
+  p9.scale_x_date(date_labels = "%Y", date_breaks = "12 months")+
+  p9.facet_wrap(facets = "variavel")+
+  p9.labs(title = "Núcleos da inflação (IPCA)", 
+          caption = "Dados: BCB | Elaboração: ÁFIRA INVESTIMENTOS",
+          color = ""
+          ) +
+  p9.xlab("")+
+  p9.ylab("")+
+  p9.theme_gray(base_size = 16)+
+  p9.theme(legend_position = "none")
+       
+)
+
+```
+
+:::
+:::

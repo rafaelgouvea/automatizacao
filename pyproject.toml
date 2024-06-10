@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "automatizacao"
+version = "0.1.0"
+description = "Gerenciamento de dependencias do projeto"
+authors = ["RafaelSouza"]
+license = "NA"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-bcb = "^0.2.0"
+pandas = "^2.2.2"
+plotnine = "^0.13.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

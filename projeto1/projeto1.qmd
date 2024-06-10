@@ -18,10 +18,10 @@ execute:
 from bcb import sgs
 import pandas as pd
 import plotnine as p9
-import locale
+#import locale
 
 # Configurar o locale para português
-locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+#locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
 
 # Importa dados
 dados_brutos_nucleos = sgs.get(
